@@ -23,6 +23,7 @@ class Button():
         self.y_pos = pos[1]
         self.size = size
         self.label = label
+        self.pressed = False
         self.button_rect = pygame.Rect(self.pos, self.size)
         self.button_text = font.render(
             self.label, True, TEXT_COLOR, BUTTON_COLOR)
@@ -35,8 +36,17 @@ class Button():
                 self.button_pos.append((x, y))
 
     def draw_button(self):
-        pygame.draw.rect(window_surface, BUTTON_COLOR, self.button_rect)
-        window_surface.blit(self.button_text, self.button_text_rect)
+        if self.pressed == False:
+            self.button_text = font.render(
+                self.label, True, TEXT_COLOR, BUTTON_COLOR)
+            pygame.draw.rect(window_surface, BUTTON_COLOR, self.button_rect)
+            window_surface.blit(self.button_text, self.button_text_rect)
+        else:
+            self.button_text = font.render(
+                self.label, True, TEXT_COLOR, BUTTON_PRESSED_COLOR)
+            pygame.draw.rect(
+                window_surface, BUTTON_PRESSED_COLOR, self.button_rect)
+            window_surface.blit(self.button_text, self.button_text_rect)
 
 
 # Terminates the program.
@@ -107,6 +117,7 @@ PATHFINDING_COLOR = (35, 35, 235)
 NODE_COLORS = [(235, 35, 35), (235, 235, 35)]
 GRID_SIZE = 20
 BUTTON_COLOR = (220, 90, 50)
+BUTTON_PRESSED_COLOR = (150, 50, 30)
 BUTTON_SIZE = (200, 50)
 
 
@@ -142,6 +153,8 @@ font = pygame.font.SysFont(None, 48)
 start_node_button = Button((100, 625), BUTTON_SIZE, "Place Start")
 end_node_button = Button((100, 700), BUTTON_SIZE, "Place End")
 place_wall_button = Button((100, 775), BUTTON_SIZE, "Place Walls")
+solve_button = Button((WINDOW_WIDTH - BUTTON_SIZE[0] -
+                       100, 700), BUTTON_SIZE, "Solve")
 
 
 # Main Loop
@@ -170,14 +183,25 @@ while True:
                 can_draw_start = True
                 can_draw_wall = False
                 can_draw_end = False
+                start_node_button.pressed = True
+                end_node_button.pressed = False
+                place_wall_button.pressed = False
             if event.pos in end_node_button.button_pos:
                 can_draw_start = False
                 can_draw_wall = False
                 can_draw_end = True
+                start_node_button.pressed = False
+                end_node_button.pressed = True
+                place_wall_button.pressed = False
             elif event.pos in place_wall_button.button_pos:
                 can_draw_start = False
                 can_draw_wall = True
                 can_draw_end = False
+                start_node_button.pressed = False
+                end_node_button.pressed = False
+                place_wall_button.pressed = True
+            elif event.pos in solve_button.button_pos:
+                path = find_path(nodes, wall_vertices, algorithm_choice)
             if can_draw_wall == True:
                 drawing_wall = True
                 draw_wall(event.pos)
@@ -199,6 +223,7 @@ while True:
     start_node_button.draw_button()
     end_node_button.draw_button()
     place_wall_button.draw_button()
+    solve_button.draw_button()
 
     # Draws the path taken
     if path:
