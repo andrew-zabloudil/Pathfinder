@@ -102,12 +102,12 @@ def draw_path(path):
         pygame.draw.rect(window_surface, PATH_COLOR, path_rect)
 
 
-""" 
+"""
 This block defines constants.
 """
 WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 600
-BANNER_HEIGHT = 250
+BANNER_HEIGHT = 200
 TEXT_COLOR = (0, 0, 0)
 BACKGROUND_COLOR = (255, 255, 255)
 BANNER_COLOR = (45, 220, 100)
@@ -150,11 +150,16 @@ pygame.display.set_caption("Pathfinder")
 pygame.mouse.set_visible(True)
 font = pygame.font.SysFont(None, 48)
 
-start_node_button = Button((100, 625), BUTTON_SIZE, "Place Start")
-end_node_button = Button((100, 700), BUTTON_SIZE, "Place End")
-place_wall_button = Button((100, 775), BUTTON_SIZE, "Place Walls")
-solve_button = Button((WINDOW_WIDTH - BUTTON_SIZE[0] -
-                       100, 700), BUTTON_SIZE, "Solve")
+start_node_button = Button((40, WINDOW_HEIGHT + 25),
+                           BUTTON_SIZE, "Place Start")
+end_node_button = Button(
+    (80 + BUTTON_SIZE[0], WINDOW_HEIGHT + 25), BUTTON_SIZE, "Place End")
+place_wall_button = Button(
+    (WINDOW_WIDTH - 2 * BUTTON_SIZE[0] - 80, WINDOW_HEIGHT + 25), BUTTON_SIZE, "Place Walls")
+solve_button = Button(
+    (WINDOW_WIDTH - BUTTON_SIZE[0] - 40, WINDOW_HEIGHT + 25), BUTTON_SIZE, "Solve")
+dijkstra_button = Button(
+    (40, WINDOW_HEIGHT + BANNER_HEIGHT - 25 - BUTTON_SIZE[1]), BUTTON_SIZE, "Dijkstra")
 
 
 # Main Loop
@@ -163,21 +168,6 @@ while True:
     for event in pygame.event.get():
         if event.type == QUIT:
             terminate()
-        if event.type == KEYDOWN:
-            if event.key == K_1:
-                can_draw_start = True
-                can_draw_wall = False
-                can_draw_end = False
-            if event.key == K_2:
-                can_draw_start = False
-                can_draw_wall = False
-                can_draw_end = True
-            if event.key == K_3:
-                can_draw_start = False
-                can_draw_wall = True
-                can_draw_end = False
-            if event.key == K_RETURN:
-                path = find_path(nodes, wall_vertices, algorithm_choice)
         if event.type == MOUSEBUTTONDOWN:
             if event.pos in start_node_button.button_pos:
                 can_draw_start = True
@@ -224,6 +214,7 @@ while True:
     end_node_button.draw_button()
     place_wall_button.draw_button()
     solve_button.draw_button()
+    dijkstra_button.draw_button()
 
     # Draws the path taken
     if path:
