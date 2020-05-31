@@ -24,6 +24,7 @@ class Button():
         self.size = size
         self.label = label
         self.pressed = False
+
         self.button_rect = pygame.Rect(self.pos, self.size)
         self.button_text = font.render(
             self.label, True, TEXT_COLOR, BUTTON_COLOR)
@@ -35,17 +36,19 @@ class Button():
             for y in range(self.y_pos, self.y_pos + self.size[1]):
                 self.button_pos.append((x, y))
 
+        self.button_img = pygame.image.load('img/button.png')
+        self.button_pressed_img = pygame.image.load('img/button_pressed.png')
+
     def draw_button(self):
         if self.pressed == False:
             self.button_text = font.render(
                 self.label, True, TEXT_COLOR, BUTTON_COLOR)
-            pygame.draw.rect(window_surface, BUTTON_COLOR, self.button_rect)
+            window_surface.blit(self.button_img, self.button_rect)
             window_surface.blit(self.button_text, self.button_text_rect)
         else:
             self.button_text = font.render(
                 self.label, True, TEXT_COLOR, BUTTON_PRESSED_COLOR)
-            pygame.draw.rect(
-                window_surface, BUTTON_PRESSED_COLOR, self.button_rect)
+            window_surface.blit(self.button_pressed_img, self.button_rect)
             window_surface.blit(self.button_text, self.button_text_rect)
 
 
@@ -63,9 +66,23 @@ def draw_wall(pos):
     y_grid = int(pos[1] / 20) * 20
     if y_grid < WINDOW_HEIGHT:
         wall_vertex = (x_grid, y_grid)
-        wall_vertices.append(wall_vertex)
         wall_rect = pygame.Rect(x_grid, y_grid, GRID_SIZE, GRID_SIZE)
-        walls.append(wall_rect)
+        if wall_vertex not in wall_vertices:
+            wall_vertices.append(wall_vertex)
+            walls.append(wall_rect)
+    else:
+        return
+
+
+def erase_wall(pos):
+    x_grid = int(pos[0] / 20) * 20
+    y_grid = int(pos[1] / 20) * 20
+    if y_grid < WINDOW_HEIGHT:
+        wall_vertex = (x_grid, y_grid)
+        wall_rect = pygame.Rect(x_grid, y_grid, GRID_SIZE, GRID_SIZE)
+        if wall_vertex in wall_vertices:
+            wall_vertices.remove(wall_vertex)
+            walls.remove(wall_rect)
     else:
         return
 
@@ -107,25 +124,27 @@ This block defines constants.
 """
 WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 600
-BANNER_HEIGHT = 200
-TEXT_COLOR = (0, 0, 0)
-BACKGROUND_COLOR = (255, 255, 255)
-BANNER_COLOR = (45, 220, 100)
+BANNER_HEIGHT = 175
+TEXT_COLOR = (250, 250, 250)
+BACKGROUND_COLOR = (240, 240, 240)
+BANNER_COLOR = (220, 220, 220)
 WALL_COLOR = (0, 0, 0)
 PATH_COLOR = (35, 235, 35)
 PATHFINDING_COLOR = (35, 35, 235)
 NODE_COLORS = [(235, 35, 35), (235, 235, 35)]
 GRID_SIZE = 20
-BUTTON_COLOR = (220, 90, 50)
-BUTTON_PRESSED_COLOR = (150, 50, 30)
+BUTTON_COLOR = (40, 120, 200)
+BUTTON_PRESSED_COLOR = (30, 60, 180)
 BUTTON_SIZE = (200, 50)
 
 
 pygame.init()
 
-# Sets default settings.
+# Sets default settings.s
 can_draw_wall = True
 drawing_wall = False
+can_erase_wall = False
+erasing_wall = False
 can_draw_start = False
 can_draw_end = False
 algorithm_choice = "Dijkstra"
@@ -148,18 +167,20 @@ window_surface.blit(banner_surface, (0, WINDOW_HEIGHT))
 
 pygame.display.set_caption("Pathfinder")
 pygame.mouse.set_visible(True)
-font = pygame.font.SysFont(None, 48)
+font = pygame.font.SysFont(None, 42)
 
 start_node_button = Button((40, WINDOW_HEIGHT + 25),
                            BUTTON_SIZE, "Place Start")
 end_node_button = Button(
-    (80 + BUTTON_SIZE[0], WINDOW_HEIGHT + 25), BUTTON_SIZE, "Place End")
+    (40, WINDOW_HEIGHT + BANNER_HEIGHT - 25 - BUTTON_SIZE[1]), BUTTON_SIZE, "Place End")
 place_wall_button = Button(
     (WINDOW_WIDTH - 2 * BUTTON_SIZE[0] - 80, WINDOW_HEIGHT + 25), BUTTON_SIZE, "Place Walls")
 solve_button = Button(
     (WINDOW_WIDTH - BUTTON_SIZE[0] - 40, WINDOW_HEIGHT + 25), BUTTON_SIZE, "Solve")
 dijkstra_button = Button(
     (40, WINDOW_HEIGHT + BANNER_HEIGHT - 25 - BUTTON_SIZE[1]), BUTTON_SIZE, "Dijkstra")
+erase_wall_button = Button(
+    (WINDOW_WIDTH - 2 * BUTTON_SIZE[0] - 80, WINDOW_HEIGHT + BANNER_HEIGHT - 25 - BUTTON_SIZE[1]), BUTTON_SIZE, "Erase Walls")
 
 
 # Main Loop
@@ -173,35 +194,57 @@ while True:
                 can_draw_start = True
                 can_draw_wall = False
                 can_draw_end = False
+                can_erase_wall = False
                 start_node_button.pressed = True
                 end_node_button.pressed = False
                 place_wall_button.pressed = False
+                erase_wall_button.pressed = False
             if event.pos in end_node_button.button_pos:
                 can_draw_start = False
                 can_draw_wall = False
                 can_draw_end = True
+                can_erase_wall = False
                 start_node_button.pressed = False
                 end_node_button.pressed = True
                 place_wall_button.pressed = False
+                erase_wall_button.pressed = False
             elif event.pos in place_wall_button.button_pos:
                 can_draw_start = False
                 can_draw_wall = True
                 can_draw_end = False
+                can_erase_wall = False
                 start_node_button.pressed = False
                 end_node_button.pressed = False
                 place_wall_button.pressed = True
+                erase_wall_button.pressed = False
+            elif event.pos in erase_wall_button.button_pos:
+                can_draw_start = False
+                can_draw_wall = False
+                can_draw_end = False
+                can_erase_wall = True
+                start_node_button.pressed = False
+                end_node_button.pressed = False
+                place_wall_button.pressed = False
+                erase_wall_button.pressed = True
             elif event.pos in solve_button.button_pos:
                 path = find_path(nodes, wall_vertices, algorithm_choice)
+
             if can_draw_wall == True:
                 drawing_wall = True
                 draw_wall(event.pos)
+            if can_erase_wall == True:
+                erasing_wall = True
+                erase_wall(event.pos)
             if can_draw_start == True or can_draw_end == True:
                 draw_node(event.pos)
         if event.type == MOUSEBUTTONUP:
             drawing_wall = False
+            erasing_wall = False
         if event.type == MOUSEMOTION:
             if drawing_wall:
                 draw_wall(event.pos)
+            elif erasing_wall:
+                erase_wall(event.pos)
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 terminate()
@@ -209,12 +252,14 @@ while True:
     window_surface.fill(BACKGROUND_COLOR)
     window_surface.blit(banner_surface, (0, WINDOW_HEIGHT))
     banner_surface.fill(BANNER_COLOR)
+    pygame.draw.line(window_surface, (180, 180, 180),
+                     (0, WINDOW_HEIGHT), (WINDOW_WIDTH, WINDOW_HEIGHT), 2)
 
     start_node_button.draw_button()
     end_node_button.draw_button()
     place_wall_button.draw_button()
+    erase_wall_button.draw_button()
     solve_button.draw_button()
-    dijkstra_button.draw_button()
 
     # Draws the path taken
     if path:
