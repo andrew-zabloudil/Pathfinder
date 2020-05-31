@@ -159,15 +159,19 @@ nodes = [None, None]
 node_rect = [None, None]
 
 
-# Sets up window surface
+# Sets up display window and surfaces
+
+pygame.display.set_caption("Pathfinder")
+icon = pygame.image.load('img/icon.png')
+pygame.display.set_icon(icon)
+pygame.mouse.set_visible(True)
+font = pygame.font.SysFont(None, 42)
+
+
 window_surface = pygame.display.set_mode(
     (WINDOW_WIDTH, WINDOW_HEIGHT + BANNER_HEIGHT))
 banner_surface = pygame.Surface((WINDOW_WIDTH, BANNER_HEIGHT))
 window_surface.blit(banner_surface, (0, WINDOW_HEIGHT))
-
-pygame.display.set_caption("Pathfinder")
-pygame.mouse.set_visible(True)
-font = pygame.font.SysFont(None, 42)
 
 start_node_button = Button((40, WINDOW_HEIGHT + 25),
                            BUTTON_SIZE, "Place Start")
