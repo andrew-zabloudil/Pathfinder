@@ -1,3 +1,14 @@
+"""
+Bugs: 
+1.  If the only path is along the edge of the window, 
+    it will cause a KeyError when it 
+    checks the point's neighbors and looks for a key outside the window.
+2.  It will cause an error if start or end is None
+3.  It will loop infinitely and stop responding if there is no possible path
+    due to wall placement.
+"""
+
+
 def Dijkstra(nodes, walls, width, height):
     start = nodes[0]
     end = nodes[1]

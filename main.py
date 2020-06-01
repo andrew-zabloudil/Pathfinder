@@ -119,12 +119,24 @@ def draw_path(path):
         pygame.draw.rect(window_surface, PATH_COLOR, path_rect)
 
 
+def draw_grid():
+    for x in range(0, WINDOW_WIDTH, GRID_SIZE):
+        pygame.draw.line(window_surface, GRID_COLOR,
+                         (x, 0), (x, WINDOW_HEIGHT), 1)
+    for y in range(0, WINDOW_HEIGHT, GRID_SIZE):
+        pygame.draw.line(window_surface, GRID_COLOR,
+                         (0, y), (WINDOW_WIDTH, y), 1)
+
+
 """
 This block defines constants.
 """
 WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 600
 BANNER_HEIGHT = 175
+GRID_SIZE = 20
+BUTTON_SIZE = (200, 50)
+
 TEXT_COLOR = (250, 250, 250)
 BACKGROUND_COLOR = (240, 240, 240)
 BANNER_COLOR = (220, 220, 220)
@@ -132,10 +144,9 @@ WALL_COLOR = (0, 0, 0)
 PATH_COLOR = (35, 235, 35)
 PATHFINDING_COLOR = (35, 35, 235)
 NODE_COLORS = [(235, 35, 35), (235, 235, 35)]
-GRID_SIZE = 20
 BUTTON_COLOR = (40, 120, 200)
 BUTTON_PRESSED_COLOR = (30, 60, 180)
-BUTTON_SIZE = (200, 50)
+GRID_COLOR = (200, 200, 200)
 
 
 pygame.init()
@@ -258,6 +269,7 @@ while True:
     banner_surface.fill(BANNER_COLOR)
     pygame.draw.line(window_surface, (180, 180, 180),
                      (0, WINDOW_HEIGHT), (WINDOW_WIDTH, WINDOW_HEIGHT), 2)
+    draw_grid()
 
     start_node_button.draw_button()
     end_node_button.draw_button()
