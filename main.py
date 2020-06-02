@@ -109,9 +109,9 @@ def draw_node(pos):
 
 def find_path(nodes, wall_vertices):
     if visualize_solver == False:
-        return Dijkstra(nodes, wall_vertices, WINDOW_WIDTH, WINDOW_HEIGHT)
+        return Dijkstra(nodes, wall_vertices, WINDOW_WIDTH, WINDOW_HEIGHT, GRID_SIZE)
     else:
-        return Dijkstra_visual(nodes, wall_vertices, WINDOW_WIDTH, WINDOW_HEIGHT)
+        return Dijkstra_visual(nodes, wall_vertices, WINDOW_WIDTH, WINDOW_HEIGHT, GRID_SIZE)
 
 # Draws the shortest path found in find_path
 
@@ -267,7 +267,8 @@ while True:
                 place_wall_button.pressed = False
                 erase_wall_button.pressed = True
             elif event.pos in solve_button.button_pos:
-                path = find_path(nodes, wall_vertices)
+                if nodes[0] != None and nodes[1] != None:
+                    path = find_path(nodes, wall_vertices)
             elif event.pos in visualize_button.button_pos:
                 if visualize_solver == False:
                     visualize_solver = True

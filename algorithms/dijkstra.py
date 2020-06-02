@@ -3,88 +3,69 @@ Bugs:
 1.  If the only path is along the edge of the window, 
     it will cause a KeyError when it 
     checks the point's neighbors and looks for a key outside the window.
-2.  It will cause an error if start or end is None
 3.  It will loop infinitely and stop responding if there is no possible path
     due to wall placement.
 """
 
 
-def Dijkstra(nodes, walls, width, height):
+def Dijkstra(nodes, walls, WIDTH, HEIGHT, GRID_SIZE):
     start = nodes[0]
     end = nodes[1]
 
     dist = {}
-    graph = []
     Q = []
     path = []
 
-    for x in range(0, width, 20):
-        for y in range(0, height, 20):
-            graph.append((x, y))
+    try:
+        for x in range(0, WIDTH, GRID_SIZE):
+            for y in range(0, HEIGHT, GRID_SIZE):
+                vertex = (x, y)
+                Q.append(vertex)
+                if vertex != start:
+                    dist[vertex] = 1000000
+                else:
+                    dist[vertex] = 0
 
-    for vertex in graph:
-        if vertex != start:
-            dist[vertex] = 1000000
-        else:
-            dist[vertex] = 0
-        Q.append(vertex)
-
-    while len(Q) != 0:
-        if start in Q:
-            v = start
-        else:
-            min_dist = 1000000
-            for vertex in Q:
-                if dist[vertex] < min_dist:
-                    min_dist = dist[vertex]
-                    v = vertex
-        if v in Q:
-            Q.remove(v)
-
-        if v == end:
-            dist[start] = 0
-            while v != start:
+        while len(Q) != 0:
+            if start in Q:
+                v = start
+            else:
                 min_dist = 1000000
-                u1 = (v[0] - 20, v[1])
-                u2 = (v[0], v[1] - 20)
-                u3 = (v[0] + 20, v[1])
-                u4 = (v[0], v[1] + 20)
-                possible_u = [u1, u2, u3, u4]
-                for u in possible_u:
-                    if (dist[u] < min_dist) and (u not in walls):
-                        min_dist = dist[u]
-                        v = u
-                path.append(v)
-            if v == start:
-                return path
+                for vertex in Q:
+                    if dist[vertex] < min_dist and dist[vertex] > 0:
+                        min_dist = dist[vertex]
+                        v = vertex
+            if v in Q:
+                Q.remove(v)
 
-        for i in range(4):
-            if i == 0 and (v[0] - 20, v[1]) in Q:
-                u = (v[0] - 20, v[1])
-                if u not in walls:
-                    alt = dist[v] + 20
-                    if alt < dist[u]:
-                        dist[u] = alt
-            elif i == 1 and (v[0], v[1] - 20) in Q:
-                u = (v[0], v[1] - 20)
-                if u not in walls:
-                    alt = dist[v] + 20
-                    if alt < dist[u]:
-                        dist[u] = alt
-            elif i == 2 and (v[0] + 20, v[1]) in Q:
-                u = (v[0] + 20, v[1])
-                if u not in walls:
-                    alt = dist[v] + 20
-                    if alt < dist[u]:
-                        dist[u] = alt
-            elif i == 3 and (v[0], v[1] + 20) in Q:
-                u = (v[0], v[1] + 20)
-                if u not in walls:
-                    alt = dist[v] + 20
-                    if alt < dist[u]:
-                        dist[u] = alt
+            neighbor_offsets = [
+                (GRID_SIZE, 0),
+                (-GRID_SIZE, 0),
+                (0, GRID_SIZE),
+                (0, -GRID_SIZE)
+            ]
 
-        if v == start:
-            dist.pop(v)
+            if v == end:
+                while v != start:
+                    min_dist = 1000000
+                    v_temp = v
+                    for offset in neighbor_offsets:
+                        u = (v[0] + offset[0], v[1] + offset[1])
+                        if (dist[u] < min_dist) and (u not in walls):
+                            min_dist = dist[u]
+                            v_temp = u
+                    v = v_temp
+                    path.append(v)
+                if v == start:
+                    return path
 
-    return path
+            for offset in neighbor_offsets:
+                u = (v[0] + offset[0], v[1] + offset[1])
+                if u in Q and u not in walls:
+                    alt = dist[v] + GRID_SIZE
+                    if alt < dist[u]:
+                        dist[u] = alt
+    
+    except:
+        return path
+
