@@ -10,6 +10,7 @@ import sys
 import pygame
 from pygame.locals import *
 from algorithms.dijkstra import Dijkstra
+from algorithms.dijkstra_visual import Dijkstra_visual
 
 """
 A class to easily set up buttons.
@@ -106,9 +107,11 @@ def draw_node(pos):
 # Finds the shortest path based on the chosen algorithm.
 
 
-def find_path(nodes, wall_vertices, choice):
-    if choice == "Dijkstra":
+def find_path(nodes, wall_vertices):
+    if visualize_solver == False:
         return Dijkstra(nodes, wall_vertices, WINDOW_WIDTH, WINDOW_HEIGHT)
+    else:
+        return Dijkstra_visual(nodes, wall_vertices, WINDOW_WIDTH, WINDOW_HEIGHT)
 
 # Draws the shortest path found in find_path
 
@@ -117,6 +120,8 @@ def draw_path(path):
     for vertex in path:
         path_rect = pygame.Rect(vertex[0], vertex[1], GRID_SIZE, GRID_SIZE)
         pygame.draw.rect(window_surface, PATH_COLOR, path_rect)
+
+# Creates a light grid in the drawing space for ease of use.
 
 
 def draw_grid():
@@ -158,7 +163,7 @@ can_erase_wall = False
 erasing_wall = False
 can_draw_start = False
 can_draw_end = False
-algorithm_choice = "Dijkstra"
+visualize_solver = False
 
 
 # Prepares empty structures to be used in later functions.
@@ -184,19 +189,39 @@ window_surface = pygame.display.set_mode(
 banner_surface = pygame.Surface((WINDOW_WIDTH, BANNER_HEIGHT))
 window_surface.blit(banner_surface, (0, WINDOW_HEIGHT))
 
-start_node_button = Button((40, WINDOW_HEIGHT + 25),
-                           BUTTON_SIZE, "Place Start")
-end_node_button = Button(
-    (40, WINDOW_HEIGHT + BANNER_HEIGHT - 25 - BUTTON_SIZE[1]), BUTTON_SIZE, "Place End")
-place_wall_button = Button(
-    (WINDOW_WIDTH - 2 * BUTTON_SIZE[0] - 80, WINDOW_HEIGHT + 25), BUTTON_SIZE, "Place Walls")
-solve_button = Button(
-    (WINDOW_WIDTH - BUTTON_SIZE[0] - 40, WINDOW_HEIGHT + 25), BUTTON_SIZE, "Solve")
-dijkstra_button = Button(
-    (40, WINDOW_HEIGHT + BANNER_HEIGHT - 25 - BUTTON_SIZE[1]), BUTTON_SIZE, "Dijkstra")
-erase_wall_button = Button(
-    (WINDOW_WIDTH - 2 * BUTTON_SIZE[0] - 80, WINDOW_HEIGHT + BANNER_HEIGHT - 25 - BUTTON_SIZE[1]), BUTTON_SIZE, "Erase Walls")
+# Creates the buttons
 
+start_node_button = Button(
+    (40, WINDOW_HEIGHT + 25),
+    BUTTON_SIZE,
+    "Place Start"
+)
+end_node_button = Button(
+    (40, WINDOW_HEIGHT + BANNER_HEIGHT - 25 - BUTTON_SIZE[1]),
+    BUTTON_SIZE,
+    "Place End"
+)
+place_wall_button = Button(
+    (BUTTON_SIZE[0] + 80, WINDOW_HEIGHT + 25),
+    BUTTON_SIZE,
+    "Place Walls"
+)
+erase_wall_button = Button(
+    (BUTTON_SIZE[0] + 80, WINDOW_HEIGHT + BANNER_HEIGHT - 25 - BUTTON_SIZE[1]),
+    BUTTON_SIZE,
+    "Erase Walls"
+)
+solve_button = Button(
+    (WINDOW_WIDTH - BUTTON_SIZE[0] - 40, WINDOW_HEIGHT + 25),
+    BUTTON_SIZE,
+    "Solve"
+)
+visualize_button = Button(
+    (WINDOW_WIDTH - BUTTON_SIZE[0] - 40,
+     WINDOW_HEIGHT + BANNER_HEIGHT - 25 - BUTTON_SIZE[1]),
+    BUTTON_SIZE,
+    "Visualize"
+)
 
 # Main Loop
 
@@ -242,7 +267,14 @@ while True:
                 place_wall_button.pressed = False
                 erase_wall_button.pressed = True
             elif event.pos in solve_button.button_pos:
-                path = find_path(nodes, wall_vertices, algorithm_choice)
+                path = find_path(nodes, wall_vertices)
+            elif event.pos in visualize_button.button_pos:
+                if visualize_solver == False:
+                    visualize_solver = True
+                    visualize_button.pressed = True
+                else:
+                    visualize_solver = False
+                    visualize_button.pressed = False
 
             if can_draw_wall == True:
                 drawing_wall = True
@@ -276,6 +308,7 @@ while True:
     place_wall_button.draw_button()
     erase_wall_button.draw_button()
     solve_button.draw_button()
+    visualize_button.draw_button()
 
     # Draws the path taken
     if path:
