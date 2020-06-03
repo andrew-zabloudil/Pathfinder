@@ -120,7 +120,6 @@ def draw_path(path):
     for vertex in path:
         path_rect = pygame.Rect(vertex[0], vertex[1], GRID_SIZE, GRID_SIZE)
         pygame.draw.rect(window_surface, PATH_COLOR, path_rect)
-
 # Creates a light grid in the drawing space for ease of use.
 
 
@@ -131,6 +130,15 @@ def draw_grid():
     for y in range(0, WINDOW_HEIGHT, GRID_SIZE):
         pygame.draw.line(window_surface, GRID_COLOR,
                          (0, y), (WINDOW_WIDTH, y), 1)
+
+
+def display_error():
+    error_text = font.render(
+        "Select a start and an end node first.", True, TEXT_COLOR, ERROR_COLOR)
+    error_text_rect = error_text.get_rect()
+    error_text_rect.centerx = int(WINDOW_WIDTH / 2)
+    error_text_rect.centery = int(WINDOW_HEIGHT / 2)
+    window_surface.blit(error_text, error_text_rect)
 
 
 """
@@ -152,7 +160,7 @@ NODE_COLORS = [(235, 35, 35), (235, 235, 35)]
 BUTTON_COLOR = (40, 120, 200)
 BUTTON_PRESSED_COLOR = (30, 60, 180)
 GRID_COLOR = (200, 200, 200)
-
+ERROR_COLOR = (230, 23, 23)
 
 pygame.init()
 
@@ -164,6 +172,7 @@ erasing_wall = False
 can_draw_start = False
 can_draw_end = False
 visualize_solver = False
+display_error_message = False
 
 
 # Prepares empty structures to be used in later functions.
@@ -235,15 +244,17 @@ while True:
                 can_draw_wall = False
                 can_draw_end = False
                 can_erase_wall = False
+                display_error_message = False
                 start_node_button.pressed = True
                 end_node_button.pressed = False
                 place_wall_button.pressed = False
                 erase_wall_button.pressed = False
-            if event.pos in end_node_button.button_pos:
+            elif event.pos in end_node_button.button_pos:
                 can_draw_start = False
                 can_draw_wall = False
                 can_draw_end = True
                 can_erase_wall = False
+                display_error_message = False
                 start_node_button.pressed = False
                 end_node_button.pressed = True
                 place_wall_button.pressed = False
@@ -253,6 +264,7 @@ while True:
                 can_draw_wall = True
                 can_draw_end = False
                 can_erase_wall = False
+                display_error_message = False
                 start_node_button.pressed = False
                 end_node_button.pressed = False
                 place_wall_button.pressed = True
@@ -262,18 +274,24 @@ while True:
                 can_draw_wall = False
                 can_draw_end = False
                 can_erase_wall = True
+                display_error_message = False
                 start_node_button.pressed = False
                 end_node_button.pressed = False
                 place_wall_button.pressed = False
                 erase_wall_button.pressed = True
             elif event.pos in solve_button.button_pos:
                 if nodes[0] != None and nodes[1] != None:
+                    display_error_message = False
                     path = find_path(nodes, wall_vertices)
+                else:
+                    display_error_message = True
             elif event.pos in visualize_button.button_pos:
                 if visualize_solver == False:
+                    display_error_message = False
                     visualize_solver = True
                     visualize_button.pressed = True
                 else:
+                    display_error_message = False
                     visualize_solver = False
                     visualize_button.pressed = False
 
@@ -314,6 +332,9 @@ while True:
     # Draws the path taken
     if path:
         draw_path(path)
+
+    if display_error_message == True:
+        display_error()
 
     # Draws start and end nodes.
     for i, node in enumerate(node_rect):
