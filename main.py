@@ -63,6 +63,7 @@ def terminate():
 
 
 def draw_wall(pos):
+    global path
     x_grid = int(pos[0] / 20) * 20
     y_grid = int(pos[1] / 20) * 20
     if y_grid < WINDOW_HEIGHT:
@@ -71,11 +72,13 @@ def draw_wall(pos):
         if wall_vertex not in wall_vertices:
             wall_vertices.append(wall_vertex)
             walls.append(wall_rect)
+            path = []
     else:
         return
 
 
 def erase_wall(pos):
+    global path
     x_grid = int(pos[0] / 20) * 20
     y_grid = int(pos[1] / 20) * 20
     if y_grid < WINDOW_HEIGHT:
@@ -84,6 +87,7 @@ def erase_wall(pos):
         if wall_vertex in wall_vertices:
             wall_vertices.remove(wall_vertex)
             walls.remove(wall_rect)
+            path = []
     else:
         return
 
