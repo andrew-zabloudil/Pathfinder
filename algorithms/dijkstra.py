@@ -1,10 +1,8 @@
 """
 Bugs: 
-1.  If the only path is along the edge of the window, 
-    it will cause a KeyError when it 
-    checks the point's neighbors and looks for a key outside the window.
 3.  It will loop infinitely and stop responding if there is no possible path
     due to wall placement.
+3a. It no longer loops infinitely, but it doesn't notify the user when it breaks
 """
 
 
@@ -37,6 +35,8 @@ def Dijkstra(nodes, walls, WIDTH, HEIGHT, GRID_SIZE):
                         v = vertex
             if v in Q:
                 Q.remove(v)
+            else:
+                break
 
             neighbor_offsets = [
                 (GRID_SIZE, 0),
@@ -50,10 +50,13 @@ def Dijkstra(nodes, walls, WIDTH, HEIGHT, GRID_SIZE):
                     min_dist = 1000000
                     v_temp = v
                     for offset in neighbor_offsets:
-                        u = (v[0] + offset[0], v[1] + offset[1])
-                        if (dist[u] < min_dist) and (u not in walls):
-                            min_dist = dist[u]
-                            v_temp = u
+                        try:
+                            u = (v[0] + offset[0], v[1] + offset[1])
+                            if (dist[u] < min_dist) and (u not in walls):
+                                min_dist = dist[u]
+                                v_temp = u
+                        except:
+                            continue
                     v = v_temp
                     path.append(v)
                 if v == start:
@@ -62,10 +65,12 @@ def Dijkstra(nodes, walls, WIDTH, HEIGHT, GRID_SIZE):
             for offset in neighbor_offsets:
                 u = (v[0] + offset[0], v[1] + offset[1])
                 if u in Q and u not in walls:
-                    alt = dist[v] + GRID_SIZE
-                    if alt < dist[u]:
-                        dist[u] = alt
-    
+                    try:
+                        alt = dist[v] + GRID_SIZE
+                        if alt < dist[u]:
+                            dist[u] = alt
+                    except:
+                        continue
+
     except:
         return path
-
