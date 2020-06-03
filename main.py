@@ -59,7 +59,7 @@ def terminate():
     pygame.quit()
     sys.exit()
 
-# Creates a wall block at the designated position.
+# Creates or removes a wall block at the designated position.
 
 
 def draw_wall(pos):
@@ -119,6 +119,7 @@ def draw_path(path):
     for vertex in path:
         path_rect = pygame.Rect(vertex[0], vertex[1], GRID_SIZE, GRID_SIZE)
         pygame.draw.rect(window_surface, PATH_COLOR, path_rect)
+
 # Creates a light grid in the drawing space for ease of use.
 
 
@@ -129,6 +130,8 @@ def draw_grid():
     for y in range(0, WINDOW_HEIGHT, GRID_SIZE):
         pygame.draw.line(window_surface, GRID_COLOR,
                          (0, y), (WINDOW_WIDTH, y), 1)
+
+# Displays a message if solve is clicked without a start and end node.
 
 
 def display_error():
@@ -163,7 +166,7 @@ ERROR_COLOR = (230, 23, 23)
 
 pygame.init()
 
-# Sets default settings.s
+# Sets default settings.
 can_draw_wall = True
 drawing_wall = False
 can_erase_wall = False
@@ -189,7 +192,6 @@ icon = pygame.image.load('img/icon.png')
 pygame.display.set_icon(icon)
 pygame.mouse.set_visible(True)
 font = pygame.font.SysFont(None, 42)
-
 
 window_surface = pygame.display.set_mode(
     (WINDOW_WIDTH, WINDOW_HEIGHT + BANNER_HEIGHT))
@@ -234,6 +236,7 @@ visualize_button = Button(
 
 while True:
     for event in pygame.event.get():
+        # Quits the program.
         if event.type == QUIT:
             terminate()
         if event.type == MOUSEBUTTONDOWN:
@@ -310,6 +313,7 @@ while True:
             if event.key == K_ESCAPE:
                 terminate()
 
+    # Draws the window.
     window_surface.fill(BACKGROUND_COLOR)
     window_surface.blit(banner_surface, (0, WINDOW_HEIGHT))
     banner_surface.fill(BANNER_COLOR)
@@ -317,6 +321,7 @@ while True:
                      (0, WINDOW_HEIGHT), (WINDOW_WIDTH, WINDOW_HEIGHT), 2)
     draw_grid()
 
+    # Draws the buttons to the surface.
     start_node_button.draw_button()
     end_node_button.draw_button()
     place_wall_button.draw_button()
@@ -324,11 +329,10 @@ while True:
     solve_button.draw_button()
     visualize_button.draw_button()
 
-    # Draws the path taken
+    # Draws the path taken or displays an error message.
     if path:
         draw_path(path)
-
-    if display_error_message == True:
+    elif display_error_message == True:
         display_error()
 
     # Draws start and end nodes.
@@ -340,4 +344,5 @@ while True:
     for wall in walls:
         pygame.draw.rect(window_surface, WALL_COLOR, wall)
 
+    # Updates the display.
     pygame.display.update()
