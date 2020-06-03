@@ -64,40 +64,32 @@ def terminate():
 
 def draw_wall(pos):
     global path
-    x_grid = int(pos[0] / 20) * 20
-    y_grid = int(pos[1] / 20) * 20
+    x_grid = int(pos[0] / GRID_SIZE) * GRID_SIZE
+    y_grid = int(pos[1] / GRID_SIZE) * GRID_SIZE
     if y_grid < WINDOW_HEIGHT:
         wall_vertex = (x_grid, y_grid)
         wall_rect = pygame.Rect(x_grid, y_grid, GRID_SIZE, GRID_SIZE)
-        if wall_vertex not in wall_vertices:
-            wall_vertices.append(wall_vertex)
-            walls.append(wall_rect)
-            path = []
+        if can_draw_wall == True:
+            if wall_vertex not in wall_vertices:
+                wall_vertices.append(wall_vertex)
+                walls.append(wall_rect)
+                path = []
+        elif can_erase_wall == True:
+            if wall_vertex in wall_vertices:
+                wall_vertices.remove(wall_vertex)
+                walls.remove(wall_rect)
+                path = []
     else:
         return
 
-
-def erase_wall(pos):
-    global path
-    x_grid = int(pos[0] / 20) * 20
-    y_grid = int(pos[1] / 20) * 20
-    if y_grid < WINDOW_HEIGHT:
-        wall_vertex = (x_grid, y_grid)
-        wall_rect = pygame.Rect(x_grid, y_grid, GRID_SIZE, GRID_SIZE)
-        if wall_vertex in wall_vertices:
-            wall_vertices.remove(wall_vertex)
-            walls.remove(wall_rect)
-            path = []
-    else:
-        return
 
 # Creates the start and end nodes.
 
 
 def draw_node(pos):
     global path
-    x_grid = int(pos[0] / 20) * 20
-    y_grid = int(pos[1] / 20) * 20
+    x_grid = int(pos[0] / GRID_SIZE) * GRID_SIZE
+    y_grid = int(pos[1] / GRID_SIZE) * GRID_SIZE
     if y_grid < WINDOW_HEIGHT:
         if can_draw_start == True:
             nodes[0] = (x_grid, y_grid)
@@ -175,7 +167,6 @@ pygame.init()
 can_draw_wall = True
 drawing_wall = False
 can_erase_wall = False
-erasing_wall = False
 can_draw_start = False
 can_draw_end = False
 visualize_solver = False
@@ -306,18 +297,15 @@ while True:
                 drawing_wall = True
                 draw_wall(event.pos)
             if can_erase_wall == True:
-                erasing_wall = True
-                erase_wall(event.pos)
+                drawing_wall = True
+                draw_wall(event.pos)
             if can_draw_start == True or can_draw_end == True:
                 draw_node(event.pos)
         if event.type == MOUSEBUTTONUP:
             drawing_wall = False
-            erasing_wall = False
         if event.type == MOUSEMOTION:
             if drawing_wall:
                 draw_wall(event.pos)
-            elif erasing_wall:
-                erase_wall(event.pos)
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 terminate()
