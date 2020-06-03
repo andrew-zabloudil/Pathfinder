@@ -10,5 +10,6 @@ between the start and end nodes.
 
 If the visualize option is turned on, the program will show the nodes
 being tested in real time as it is being run.
+
 NOTE: Turning on the visualize option will result in a decrease of
       speed and performance when solving.
