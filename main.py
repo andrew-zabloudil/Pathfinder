@@ -232,6 +232,9 @@ visualize_button = Button(
     "Visualize"
 )
 
+# Set the default starting button.
+place_wall_button.pressed = True
+
 # Main Loop
 
 while True:
