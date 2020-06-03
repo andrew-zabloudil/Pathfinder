@@ -91,16 +91,19 @@ def erase_wall(pos):
 
 
 def draw_node(pos):
+    global path
     x_grid = int(pos[0] / 20) * 20
     y_grid = int(pos[1] / 20) * 20
     if y_grid < WINDOW_HEIGHT:
         if can_draw_start == True:
             nodes[0] = (x_grid, y_grid)
             node_rect[0] = pygame.Rect(x_grid, y_grid, GRID_SIZE, GRID_SIZE)
+            path = []
 
         if can_draw_end == True:
             nodes[1] = (x_grid, y_grid)
             node_rect[1] = pygame.Rect(x_grid, y_grid, GRID_SIZE, GRID_SIZE)
+            path = []
     else:
         return
 
@@ -111,7 +114,7 @@ def find_path(nodes, wall_vertices):
     if visualize_solver == False:
         return Dijkstra(nodes, wall_vertices, WINDOW_WIDTH, WINDOW_HEIGHT, GRID_SIZE)
     else:
-        return Dijkstra_visual(nodes, wall_vertices, WINDOW_WIDTH, WINDOW_HEIGHT, GRID_SIZE)
+        return Dijkstra_visual(nodes, wall_vertices, WINDOW_WIDTH, WINDOW_HEIGHT, GRID_SIZE, window_surface)
 
 # Draws the shortest path found in find_path
 
