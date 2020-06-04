@@ -405,11 +405,6 @@ while True:
 
     draw_window()
 
-    # Draws start and end nodes.
-    for i, node in enumerate(node_rect):
-        if node != None:
-            pygame.draw.rect(window_surface, NODE_COLORS[i], node)
-
     # Draws the walls onto the screen.
     for wall in walls:
         pygame.draw.rect(window_surface, WALL_COLOR, wall)
@@ -419,6 +414,11 @@ while True:
         draw_path(path)
     elif display_error_message == True:
         display_error()
+
+    # Draws start and end nodes.
+    for i, node in enumerate(node_rect):
+        if node != None:
+            pygame.draw.rect(window_surface, NODE_COLORS[i], node)
 
     # Updates the display.
     pygame.display.update()
