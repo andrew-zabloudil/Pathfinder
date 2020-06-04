@@ -7,21 +7,17 @@ obstacles for a pathfinding algorithm to work around.
 """
 
 import sys
+import random
 import pygame
 from pygame.locals import *
 from algorithms.dijkstra import Dijkstra
 from algorithms.dijkstra_visual import Dijkstra_visual
 
-"""
-A class to easily set up buttons.
-"""
 
-
+# A Class for setting up buttons.
 class Button():
     def __init__(self, pos, size, label):
         self.pos = pos
-        self.x_pos = pos[0]
-        self.y_pos = pos[1]
         self.size = size
         self.label = label
         self.pressed = False
@@ -33,8 +29,8 @@ class Button():
         self.button_text_rect.centerx = self.button_rect.centerx
         self.button_text_rect.centery = self.button_rect.centery
         self.button_pos = []
-        for x in range(self.x_pos, self.x_pos + self.size[0]):
-            for y in range(self.y_pos, self.y_pos + self.size[1]):
+        for x in range(self.pos[0], self.pos[0] + self.size[0]):
+            for y in range(self.pos[1], self.pos[1] + self.size[1]):
                 self.button_pos.append((x, y))
 
         self.button_img = pygame.image.load('img/button.png')
@@ -60,6 +56,26 @@ def terminate():
     sys.exit()
 
 # Creates or removes a wall block at the designated position.
+
+
+def draw_window():
+    # Draws the window.
+    window_surface.fill(BACKGROUND_COLOR)
+    window_surface.blit(banner_surface, (0, WINDOW_HEIGHT))
+    banner_surface.fill(BANNER_COLOR)
+    pygame.draw.line(window_surface, (180, 180, 180),
+                     (0, WINDOW_HEIGHT), (WINDOW_WIDTH, WINDOW_HEIGHT), 2)
+    draw_grid()
+
+    # Draws the buttons to the surface.
+    start_node_button.draw_button()
+    end_node_button.draw_button()
+    place_wall_button.draw_button()
+    erase_wall_button.draw_button()
+    generate_maze_button.draw_button()
+    clear_board_button.draw_button()
+    solve_button.draw_button()
+    visualize_button.draw_button()
 
 
 def draw_wall(pos):
@@ -107,7 +123,7 @@ def draw_node(pos):
 
 
 def find_path(nodes, wall_vertices):
-    if visualize_solver == False:
+    if visualize_button.pressed == False:
         return Dijkstra(nodes, wall_vertices, WINDOW_WIDTH, WINDOW_HEIGHT, GRID_SIZE)
     else:
         return Dijkstra_visual(nodes, wall_vertices, WINDOW_WIDTH, WINDOW_HEIGHT, GRID_SIZE, window_surface)
@@ -119,6 +135,53 @@ def draw_path(path):
     for vertex in path:
         path_rect = pygame.Rect(vertex[0], vertex[1], GRID_SIZE, GRID_SIZE)
         pygame.draw.rect(window_surface, PATH_COLOR, path_rect)
+
+# Generates a random maze for the user
+
+
+def generate_maze():
+
+    # Fills in every possible wall vertex
+    for x in range(0, WINDOW_WIDTH, GRID_SIZE):
+        for y in range(0, WINDOW_HEIGHT, GRID_SIZE):
+            wall_vertices.append((x, y))
+            walls.append(pygame.Rect(x, y, GRID_SIZE, GRID_SIZE))
+    for wall in walls:
+        pygame.draw.rect(window_surface, WALL_COLOR, wall)
+    pygame.display.update()
+
+    visited = []
+
+    def clear_path(x, y):
+        index = [0, 1, 2, 3]
+        neighbor = [(x + 2 * GRID_SIZE, y), (x - 2 * GRID_SIZE, y),
+                    (x, y + 2 * GRID_SIZE), (x, y - 2 * GRID_SIZE)]
+        neighbor_wall = [(x + GRID_SIZE, y), (x - GRID_SIZE, y),
+                         (x, y + GRID_SIZE), (x, y - GRID_SIZE)]
+        random.shuffle(index)
+        for i in index:
+            if neighbor[i] not in visited:
+                visited.append((neighbor[i][0], neighbor[i][1]))
+                visited.append((neighbor_wall[i][0], neighbor_wall[i][1]))
+                try:
+                    wall_vertices.remove(neighbor[i])
+                    wall_vertices.remove(neighbor_wall[i])
+                    walls.remove(pygame.Rect(
+                        neighbor[i][0], neighbor[i][1], GRID_SIZE, GRID_SIZE))
+                    walls.remove(pygame.Rect(
+                        neighbor_wall[i][0], neighbor_wall[i][1], GRID_SIZE, GRID_SIZE))
+                    if visualize_button.pressed == True:
+                        draw_window()
+                        for wall in walls:
+                            pygame.draw.rect(window_surface, WALL_COLOR, wall)
+                        pygame.display.update()
+                        pygame.time.wait(10)
+                except:
+                    continue
+                clear_path(neighbor[i][0], neighbor[i][1])
+
+    clear_path(random.randrange(0, WINDOW_WIDTH, GRID_SIZE),
+               random.randrange(0, WINDOW_HEIGHT, GRID_SIZE))
 
 # Creates a light grid in the drawing space for ease of use.
 
@@ -172,7 +235,6 @@ drawing_wall = False
 can_erase_wall = False
 can_draw_start = False
 can_draw_end = False
-visualize_solver = False
 display_error_message = False
 
 
@@ -220,6 +282,19 @@ erase_wall_button = Button(
     BUTTON_SIZE,
     "Erase Walls"
 )
+generate_maze_button = Button(
+    (WINDOW_WIDTH - 2 * BUTTON_SIZE[0] - 80, WINDOW_HEIGHT + 25),
+    BUTTON_SIZE,
+    "Create Maze"
+)
+
+clear_board_button = Button(
+    (WINDOW_WIDTH - 2 * BUTTON_SIZE[0] - 80, WINDOW_HEIGHT +
+     BANNER_HEIGHT - 25 - BUTTON_SIZE[1]),
+    BUTTON_SIZE,
+    "Clear Board"
+)
+
 solve_button = Button(
     (WINDOW_WIDTH - BUTTON_SIZE[0] - 40, WINDOW_HEIGHT + 25),
     BUTTON_SIZE,
@@ -283,6 +358,20 @@ while True:
                 end_node_button.pressed = False
                 place_wall_button.pressed = False
                 erase_wall_button.pressed = True
+            elif event.pos in generate_maze_button.button_pos:
+                walls = []
+                wall_vertices = []
+                path = {}
+                nodes = [None, None]
+                node_rect = [None, None]
+                display_error_message = False
+                generate_maze()
+            elif event.pos in clear_board_button.button_pos:
+                walls = []
+                wall_vertices = []
+                path = {}
+                nodes = [None, None]
+                node_rect = [None, None]
             elif event.pos in solve_button.button_pos:
                 if nodes[0] != None and nodes[1] != None:
                     display_error_message = False
@@ -290,13 +379,11 @@ while True:
                 else:
                     display_error_message = True
             elif event.pos in visualize_button.button_pos:
-                if visualize_solver == False:
+                if visualize_button.pressed == False:
                     display_error_message = False
-                    visualize_solver = True
                     visualize_button.pressed = True
                 else:
                     display_error_message = False
-                    visualize_solver = False
                     visualize_button.pressed = False
 
             if can_draw_wall == True:
@@ -316,27 +403,7 @@ while True:
             if event.key == K_ESCAPE:
                 terminate()
 
-    # Draws the window.
-    window_surface.fill(BACKGROUND_COLOR)
-    window_surface.blit(banner_surface, (0, WINDOW_HEIGHT))
-    banner_surface.fill(BANNER_COLOR)
-    pygame.draw.line(window_surface, (180, 180, 180),
-                     (0, WINDOW_HEIGHT), (WINDOW_WIDTH, WINDOW_HEIGHT), 2)
-    draw_grid()
-
-    # Draws the buttons to the surface.
-    start_node_button.draw_button()
-    end_node_button.draw_button()
-    place_wall_button.draw_button()
-    erase_wall_button.draw_button()
-    solve_button.draw_button()
-    visualize_button.draw_button()
-
-    # Draws the path taken or displays an error message.
-    if path:
-        draw_path(path)
-    elif display_error_message == True:
-        display_error()
+    draw_window()
 
     # Draws start and end nodes.
     for i, node in enumerate(node_rect):
@@ -346,6 +413,12 @@ while True:
     # Draws the walls onto the screen.
     for wall in walls:
         pygame.draw.rect(window_surface, WALL_COLOR, wall)
+
+    # Draws the path taken or displays an error message.
+    if path:
+        draw_path(path)
+    elif display_error_message == True:
+        display_error()
 
     # Updates the display.
     pygame.display.update()
